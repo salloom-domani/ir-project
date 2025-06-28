@@ -12,4 +12,6 @@ Hello from ir-project!
 
 
 
-in the 3 task should install "uv pip install scikit-learn"
+in the 3 task should install 
+"uv pip install scikit-learn"
+"uv pip install transformers torch"

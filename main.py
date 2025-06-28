@@ -2,6 +2,7 @@ from data_sets.second import load_dataset
 from services.clean_text import apply_clean_tokenize_lemma_stem, clean_text_for_tfidf
 from services import db_service
 from services.tfidf import compute_tfidf
+from services.bert_embeddings import compute_bert_embeddings, save_bert_embeddings
 
 def connect_db():
     print("الاتصال بقاعدة البيانات...")
@@ -50,6 +51,20 @@ def fetch_raw_from_db_and_tfidf(limit=5):
     conn.close()
     print("تم إغلاق الاتصال بقاعدة البيانات بعد TF-IDF.")
 
+def fetch_raw_from_db_and_bert_embeddings(limit=5):
+    conn = connect_db()
+    print("جلب البيانات الخام من قاعدة البيانات...")
+    df_raw = db_service.fetch_raw_documents(conn, limit=limit)
+    print(df_raw.head())
+
+    print("تشغيل BERT embeddings على البيانات الخام...")
+    emb_matrix = compute_bert_embeddings(df_raw, text_col="text")
+
+    save_bert_embeddings(emb_matrix, file_path="bert_embeddings.npy")
+
+    conn.close()
+    print("تم إغلاق الاتصال بقاعدة البيانات بعد BERT embeddings.")
+
 if __name__ == "__main__":
     # شغّل دالة معينة حسب الحاجة:
     
@@ -57,4 +72,6 @@ if __name__ == "__main__":
     # run_full_pipeline()
     
     # لتشغيل فقط TF-IDF على البيانات الخام المخزنة في قاعدة البيانات
-    fetch_raw_from_db_and_tfidf()
+    # fetch_raw_from_db_and_tfidf()
+    
+    fetch_raw_from_db_and_bert_embeddings()

@@ -46,3 +46,14 @@ def fetch_raw_documents(conn, limit=None):
     cursor.close()
     df = pd.DataFrame(rows, columns=["doc_id", "text"])
     return df
+
+
+def fetch_raw_documents(conn, limit=5):
+    query = f"SELECT doc_id, text FROM raw_documents LIMIT {limit};"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    cursor.close()
+    # تحويل النتائج إلى DataFrame
+    df = pd.DataFrame(rows, columns=["doc_id", "text"])
+    return df

@@ -54,3 +54,7 @@ def apply_clean_tokenize_lemma_stem(df):
     df[["clean_text", "lemmas", "stems"]] = pd.DataFrame(cleaned.tolist(), index=df.index)
     print("end processing")
     return df
+
+def clean_text_for_tfidf(text):
+    clean_text, _, _ = clean_tokenize_lemma_stem(text)
+    return clean_text

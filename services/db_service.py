@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2.extras import execute_values
+import pandas as pd
 
 def connect_db():
     conn = psycopg2.connect(
@@ -34,3 +35,14 @@ def insert_processed_documents(conn, processed_df, raw_doc_ids):
     execute_values(cursor, query, tuples)
     conn.commit()
     cursor.close()
+
+def fetch_raw_documents(conn, limit=None):
+    cursor = conn.cursor()
+    query = "SELECT doc_id, text FROM raw_documents"
+    if limit:
+        query += f" LIMIT {limit}"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    cursor.close()
+    df = pd.DataFrame(rows, columns=["doc_id", "text"])
+    return df

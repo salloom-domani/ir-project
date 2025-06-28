@@ -1,37 +1,60 @@
 from data_sets.second import load_dataset
-from services.clean_text import apply_clean_tokenize_lemma_stem
+from services.clean_text import apply_clean_tokenize_lemma_stem, clean_text_for_tfidf
 from services import db_service
+from services.tfidf import compute_tfidf
 
-def main():
-    print("Hello from ir-project!")
+def connect_db():
+    print("الاتصال بقاعدة البيانات...")
+    return db_service.connect_db()
 
-    # الاتصال بقاعدة البيانات
-    conn = db_service.connect_db()
+def load_data(limit=5):
+    print(f"تحميل مجموعة بيانات بحد {limit} مستندات...")
+    df = load_dataset("beir/webis-touche2020", limit=limit)
+    print(df.head())
+    return df
 
-    # تحميل مجموعة البيانات (مثلاً 200,000 مستند)
-    df_raw = load_dataset("beir/webis-touche2020", limit=200_000)
-
-    # اقتصار البيانات على أول 5 أسطر فقط للاختبار
-    df_raw = df_raw.head(5)
-
-    print(df_raw.head())  # عرض أول 5 مستندات
-    print(f"✅ عدد الوثائق المحملة: {len(df_raw)}")
-
-    # ✅ 1) تخزين البيانات الخام في قاعدة البيانات
+def insert_raw_data(conn, df_raw):
+    print("إدخال البيانات الخام في قاعدة البيانات...")
     raw_doc_ids = db_service.insert_raw_documents(conn, df_raw)
-    print(f"✅ تم إدخال {len(raw_doc_ids)} وثيقة خام في قاعدة البيانات.")
+    print(f"تم إدخال {len(raw_doc_ids)} وثيقة خام في قاعدة البيانات.")
+    return raw_doc_ids
 
-    # ✅ 2) تنظيف ومعالجة البيانات (توكينايز، ليماتايزيشن، ستيم)
+def process_and_insert_clean_data(conn, df_raw, raw_doc_ids):
+    print("تنظيف ومعالجة البيانات...")
     df_processed = apply_clean_tokenize_lemma_stem(df_raw)
     print(df_processed.head())
 
-    # ✅ 3) تخزين البيانات المعالجة في قاعدة البيانات مع ربطها بالوثائق الخام
+    print("إدخال البيانات المعالجة في قاعدة البيانات...")
     db_service.insert_processed_documents(conn, df_processed, raw_doc_ids)
-    print("✅ تم إدخال الوثائق المعالجة في قاعدة البيانات.")
+    print("تم إدخال البيانات المعالجة في قاعدة البيانات.")
 
-    # ✅ إغلاق الاتصال
+def run_full_pipeline():
+    conn = connect_db()
+    df_raw = load_data(limit=5)
+    raw_doc_ids = insert_raw_data(conn, df_raw)
+    process_and_insert_clean_data(conn, df_raw, raw_doc_ids)
     conn.close()
-    print("✅ تم إغلاق الاتصال بقاعدة البيانات.")
+    print("تم إغلاق الاتصال بقاعدة البيانات.")
+
+def fetch_raw_from_db_and_tfidf(limit=5):
+    conn = connect_db()
+    print("جلب البيانات الخام من قاعدة البيانات...")
+    df_raw = db_service.fetch_raw_documents(conn, limit=limit)
+    print(df_raw.head())
+
+    print("تشغيل TF-IDF على البيانات الخام مع تطبيق دالة التنظيف...")
+    vectorizer, tfidf_matrix = compute_tfidf(df_raw, raw_col="text", clean_func=clean_text_for_tfidf, max_features=10000)
+    print("شكل مصفوفة TF-IDF:", tfidf_matrix.shape)
+    print("أمثلة على بعض الكلمات:", vectorizer.get_feature_names_out()[:10])
+
+    conn.close()
+    print("تم إغلاق الاتصال بقاعدة البيانات بعد TF-IDF.")
 
 if __name__ == "__main__":
-    main()
+    # شغّل دالة معينة حسب الحاجة:
+    
+    # لتشغيل كامل الخطوات من تحميل وتخزين وتنظيف
+    # run_full_pipeline()
+    
+    # لتشغيل فقط TF-IDF على البيانات الخام المخزنة في قاعدة البيانات
+    fetch_raw_from_db_and_tfidf()

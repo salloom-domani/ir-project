@@ -7,4 +7,5 @@ requires-python = ">=3.13"
 dependencies = [
     "ir-datasets>=0.5.11",
     "ir-measures>=0.3.7",
+    "nltk>=3.9.1",
 ]

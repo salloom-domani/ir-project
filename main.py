@@ -8,6 +8,7 @@ from services.indexing import build_and_save_faiss_index
 from services.query_processing import process_query
 import faiss
 import numpy as np
+from services.query_matching import search_and_rank
 
 
 def connect_db():
@@ -152,4 +153,7 @@ if __name__ == "__main__":
     # build_faiss_index()
 
     # لمعالجة استعلام معين والبحث عنه
-    process_and_search_query("What you learn in university")
+    # process_and_search_query("What you learn in university")
+
+    query = "What do you learn in university?"
+    search_and_rank(query)

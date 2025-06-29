@@ -15,3 +15,6 @@ Hello from ir-project!
 in the 3 task should install 
 "uv pip install scikit-learn"
 "uv pip install transformers torch"
+
+in the 4 task should install  (indexing)
+"uv pip install faiss-cpu"

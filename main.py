@@ -4,6 +4,7 @@ from services import db_service
 from services.tfidf import compute_tfidf
 from services.bert_embeddings import compute_bert_embeddings, save_bert_embeddings
 from services.hybrid import compute_hybrid_embeddings
+from services.indexing import build_and_save_faiss_index
 
 def connect_db():
     print("الاتصال بقاعدة البيانات...")
@@ -88,6 +89,21 @@ def compute_and_save_hybrid_embeddings_and_insert_to_db():
     print("✅ تم إغلاق الاتصال بقاعدة البيانات بعد إدخال التمثيل الهجين.")
 
 
+
+
+def build_faiss_index():
+    print("بدء بناء الفهرس باستخدام FAISS...")
+    build_and_save_faiss_index(
+        embeddings_path="hybrid_embeddings.npy",
+        index_path="faiss_index.index"
+    )
+    print("✅ تم بناء الفهرس وحفظه.")
+
+
+
+
+
+
 if __name__ == "__main__":
     # شغّل دالة معينة حسب الحاجة:
     
@@ -100,4 +116,7 @@ if __name__ == "__main__":
     # fetch_raw_from_db_and_bert_embeddings()
 
     # لتشغيل التمثيل الهجين
-    compute_and_save_hybrid_embeddings_and_insert_to_db()
+    # compute_and_save_hybrid_embeddings_and_insert_to_db()
+
+    # لتشغيل الفهرسة:
+    build_faiss_index()

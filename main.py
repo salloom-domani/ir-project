@@ -5,6 +5,10 @@ from services.tfidf import compute_tfidf
 from services.bert_embeddings import compute_bert_embeddings, save_bert_embeddings
 from services.hybrid import compute_hybrid_embeddings
 from services.indexing import build_and_save_faiss_index
+from services.query_processing import process_query
+import faiss
+import numpy as np
+
 
 def connect_db():
     print("الاتصال بقاعدة البيانات...")
@@ -85,6 +89,10 @@ def compute_and_save_hybrid_embeddings_and_insert_to_db():
     print("بدء إدخال التمثيل الهجين في قاعدة البيانات...")
     db_service.insert_hybrid_embeddings(conn, raw_doc_ids, hybrid_matrix)
 
+    np.save("doc_id_order.npy", np.array(raw_doc_ids))
+    print("✅ تم حفظ ترتيب doc_ids في doc_id_order.npy")
+
+
     conn.close()
     print("✅ تم إغلاق الاتصال بقاعدة البيانات بعد إدخال التمثيل الهجين.")
 
@@ -101,7 +109,29 @@ def build_faiss_index():
 
 
 
+def process_and_search_query(query_text, top_k=5):
+    """
+    معالجة الاستعلام والبحث في الفهرس المبني مسبقًا مع إظهار doc_ids الحقيقية.
+    """
+    # 1) معالجة الاستعلام لإنتاج التمثيل الهجين
+    query_hybrid = process_query(query_text).astype('float32')
 
+    # 2) تحميل الفهرس
+    print("✅ تحميل الفهرس من faiss_index.index...")
+    index = faiss.read_index("faiss_index.index")
+
+    # 3) تحميل doc_ids المقابلة للفهرس
+    print("✅ تحميل doc_ids المرتبطة بالفهرس...")
+    doc_ids = np.load("faiss_doc_id_order.npy")
+
+    # 4) البحث في الفهرس
+    print("✅ بدء البحث في الفهرس...")
+    distances, indices = index.search(query_hybrid, top_k)
+
+    print("✅ نتائج البحث:")
+    for rank, (idx, dist) in enumerate(zip(indices[0], distances[0]), 1):
+        real_doc_id = doc_ids[idx]  # تحويل الفهرس داخل faiss إلى doc_id حقيقي
+        print(f"[{rank}] Document ID: {real_doc_id}, Distance: {dist}")
 
 
 if __name__ == "__main__":
@@ -119,4 +149,7 @@ if __name__ == "__main__":
     # compute_and_save_hybrid_embeddings_and_insert_to_db()
 
     # لتشغيل الفهرسة:
-    build_faiss_index()
+    # build_faiss_index()
+
+    # لمعالجة استعلام معين والبحث عنه
+    process_and_search_query("What you learn in university")

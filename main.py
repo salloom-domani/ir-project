@@ -3,6 +3,7 @@ from services.clean_text import apply_clean_tokenize_lemma_stem, clean_text_for_
 from services import db_service
 from services.tfidf import compute_tfidf
 from services.bert_embeddings import compute_bert_embeddings, save_bert_embeddings
+from services.hybrid import compute_hybrid_embeddings
 
 def connect_db():
     print("الاتصال بقاعدة البيانات...")
@@ -65,6 +66,28 @@ def fetch_raw_from_db_and_bert_embeddings(limit=5):
     conn.close()
     print("تم إغلاق الاتصال بقاعدة البيانات بعد BERT embeddings.")
 
+def compute_and_save_hybrid_embeddings_and_insert_to_db():
+    conn = connect_db()
+    print("جلب البيانات الخام من قاعدة البيانات...")
+    df_raw = db_service.fetch_raw_documents(conn, limit=5)
+    raw_doc_ids = df_raw['doc_id'].tolist()
+    print(df_raw.head())
+
+    print("بدء حساب التمثيل الهجين...")
+    hybrid_matrix = compute_hybrid_embeddings(
+        tfidf_path="tfidf_matrix.npz",
+        bert_path="bert_embeddings.npy",
+        save_path="hybrid_embeddings.npy"
+    )
+    print("✅ تم حساب التمثيل الهجين.")
+
+    print("بدء إدخال التمثيل الهجين في قاعدة البيانات...")
+    db_service.insert_hybrid_embeddings(conn, raw_doc_ids, hybrid_matrix)
+
+    conn.close()
+    print("✅ تم إغلاق الاتصال بقاعدة البيانات بعد إدخال التمثيل الهجين.")
+
+
 if __name__ == "__main__":
     # شغّل دالة معينة حسب الحاجة:
     
@@ -74,4 +97,7 @@ if __name__ == "__main__":
     # لتشغيل فقط TF-IDF على البيانات الخام المخزنة في قاعدة البيانات
     # fetch_raw_from_db_and_tfidf()
     
-    fetch_raw_from_db_and_bert_embeddings()
+    # fetch_raw_from_db_and_bert_embeddings()
+
+    # لتشغيل التمثيل الهجين
+    compute_and_save_hybrid_embeddings_and_insert_to_db()

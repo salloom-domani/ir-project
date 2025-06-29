@@ -57,3 +57,16 @@ def fetch_raw_documents(conn, limit=5):
     # تحويل النتائج إلى DataFrame
     df = pd.DataFrame(rows, columns=["doc_id", "text"])
     return df
+
+def insert_hybrid_embeddings(conn, raw_doc_ids, hybrid_matrix):
+    tuples = []
+    for idx, doc_id in enumerate(raw_doc_ids):
+        embedding = hybrid_matrix[idx].tolist()  # حول التمثيل إلى قائمة
+        tuples.append((doc_id, embedding))
+    
+    cursor = conn.cursor()
+    query = """INSERT INTO hybrid_embeddings (raw_doc_id, embedding) VALUES %s"""
+    execute_values(cursor, query, tuples)
+    conn.commit()
+    cursor.close()
+    print(f"✅ تم إدخال {len(raw_doc_ids)} تمثيلًا هجينيًا في قاعدة البيانات.")

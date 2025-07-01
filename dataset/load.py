@@ -1,3 +1,4 @@
+from ir_measures import Qrel
 from ir_datasets import load as load_dataset
 from dataclasses import dataclass
 
@@ -12,14 +13,6 @@ class Document:
 class Query:
     query_id: str
     text: str
-
-
-@dataclass
-class Qrel:
-    query_id: str
-    doc_id: str
-    relevance: int
-    iteration: str
 
 
 def load_documents(name: str) -> list[Document]:
@@ -41,11 +34,6 @@ def load_queries(name: str) -> list[Query]:
 def load_qrels(name: str) -> list[Qrel]:
     dataset = load_dataset(name)
     return [
-        Qrel(
-            query_id=qrel.query_id,
-            doc_id=qrel.doc_id,
-            relevance=qrel.relevance,
-            iteration=qrel.iteration,
-        )
+        Qrel(qrel.query_id, qrel.doc_id, qrel.relevance)
         for qrel in dataset.qrels_iter()
     ]

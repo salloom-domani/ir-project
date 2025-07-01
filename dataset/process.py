@@ -23,21 +23,23 @@ def get_wordnet_pos(tag: str) -> str:
 
 
 def process(text: str) -> list[str]:
-    normalized = normalize(text)
-    tokens = tokenize(normalized)
-    tokens = stopword_removal(tokens)
+    tokens = tokenize_and_normalize(text)
     tokens = lemmatization(tokens)
     # tokens = stemming(tokens)
 
     return tokens
 
 
-def normalize(text: str):
-    return text.lower()
+def process_token(token: str) -> str:
+    token = lemmatizer.lemmatize(token)
+
+    return token
 
 
-def tokenize(text: str) -> list[str]:
-    return word_tokenize(text)
+def tokenize_and_normalize(text: str) -> list[str]:
+    tokens = word_tokenize(text)
+    tokens = stopword_removal(tokens)
+    return tokens
 
 
 def stemming(tokens: list[str]) -> list[str]:
@@ -49,6 +51,10 @@ def lemmatization(tokens: list[str]) -> list[str]:
         lemmatizer.lemmatize(token, get_wordnet_pos(tag))
         for token, tag in pos_tag(tokens)
     ]
+
+
+def get_stop_words():
+    return stopwords.words("english")
 
 
 def stopword_removal(tokens: list[str]) -> list[str]:

@@ -7,7 +7,7 @@ from dataset.process import process
 from services.tfidf import get_vectorizer_default as get_vectorizer
 
 
-def test_tfidf_langchain(dataset: str):
+def test_tfidf(dataset: str):
     queries = load_queries(dataset)
     qrels = load_qrels(dataset)
     vectorizer = get_vectorizer(dataset)

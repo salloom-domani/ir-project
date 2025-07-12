@@ -12,6 +12,7 @@ dependencies = [
     "langchain-chroma>=0.2.4",
     "langchain-community>=0.3.27",
     "langchain-huggingface>=0.3.0",
+    "langchain-ollama>=0.3.4",
     "nltk>=3.9.1",
     "pandas>=2.3.0",
     "scikit-learn>=1.7.0",

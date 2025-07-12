@@ -1,6 +1,7 @@
 from ir_measures import ScoredDoc, calc_aggregate
 from ir_measures import MAP, MRR, P, Recall
 
+from dataset.consts import FIRST_DATASET
 from dataset.load import load_qrels, load_queries
 from services.bert import search as bert_search
 

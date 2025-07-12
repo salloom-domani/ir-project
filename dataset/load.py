@@ -1,12 +1,9 @@
-from ir_measures import Qrel
-from ir_datasets import load as load_dataset
 from dataclasses import dataclass
+from typing import List
 
-
-@dataclass
-class Document:
-    doc_id: str
-    text: str
+from ir_datasets import load as load_dataset
+from ir_measures import Qrel
+from langchain_core.documents import Document
 
 
 @dataclass
@@ -15,9 +12,12 @@ class Query:
     text: str
 
 
-def load_documents(name: str) -> list[Document]:
+def load_documents(name: str) -> List[Document]:
     dataset = load_dataset(name)
-    return [Document(doc_id=doc.doc_id, text=doc.text) for doc in dataset.docs_iter()]
+    return [
+        Document(id=doc.doc_id, page_content=doc.text, metadata={"id": doc.doc_id})
+        for doc in dataset.docs_iter()
+    ]
 
 
 def load_queries(name: str) -> list[Query]:

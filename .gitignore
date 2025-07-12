@@ -12,3 +12,11 @@ wheels/
 
 # joblib
 .objects/
+
+
+# chromadb
+chroma/
+
+
+# sqlitedb
+db.sqlite

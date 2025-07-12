@@ -7,6 +7,12 @@ requires-python = ">=3.13"
 dependencies = [
     "ir-datasets>=0.5.11",
     "ir-measures>=0.3.7",
+    "langchain>=0.3.26",
+    "langchain-chroma>=0.2.4",
+    "langchain-community>=0.3.27",
+    "langchain-huggingface>=0.3.0",
     "nltk>=3.9.1",
+    "pandas>=2.3.0",
     "scikit-learn>=1.7.0",
+    "sentence-transformers>=5.0.0",
 ]

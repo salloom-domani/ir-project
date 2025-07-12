@@ -1,43 +1,14 @@
-# def query_tfidf(query: str, dataset):
-#     docs = load_documents(dataset)
-#
-#     processed_query = process(query)
-#     processed_query = " ".join(processed_query)
-#
-#     results = tf_idf_search(processed_query, dataset)[:10]
-#
-#     for result in results:
-#         doc_idx = result["doc_idx"]
-#         score = result["score"]
-#         doc = docs[doc_idx]
-#         print(doc)
-#         print(score)
-#
+from dataset.consts import FIRST_DATASET, SECOND_DATASET
+from services.tfidf_langchain import generate_vectorizer_default
+from dataset.load import load_documents
 
 
 def main():
-    query = "How do I grow taller?"
-    # query_tfidf("How do I grow taller?")
-    # generate_tfidf(SECOND_DATASET)
-    # test_tfidf(SECOND_DATASET)
-    # populate_chroma(FIRST_DATASET)
-    # populate_chroma(SECOND_DATASET)
-    # resutls = bert_search(query, FIRST_DATASET)
-    # print(resutls)
+    first_dataset_docs = load_documents(FIRST_DATASET)
+    generate_vectorizer_default(FIRST_DATASET, first_dataset_docs)
 
-    # test_bert(FIRST_DATASET)
-    # test_bert(SECOND_DATASET)
-    # generate_tfidf_langchain(FIRST_DATASET)
-    # test_tfidf(FIRST_DATASET)
-    # test_tfidf_langchain(FIRST_DATASET)
-
-    # results = tf_idf_search_lang(query, FIRST_DATASET)
-    # for result in results:
-    #     print(result)
-
-    # populate_db()
-    # docs = get_all_documents(FIRST_DATASET, 10)
-    # print(docs)
+    second_dataset_docs = load_documents(SECOND_DATASET)
+    generate_vectorizer_default(SECOND_DATASET, second_dataset_docs)
 
 
 if __name__ == "__main__":

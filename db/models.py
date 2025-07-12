@@ -1,31 +1,19 @@
-from typing import List
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlmodel import Field, SQLModel, Relationship
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class Dataset(Base):
-    __tablename__ = "dataset"
-    name: Mapped[str] = mapped_column(primary_key=True)
-    docs: Mapped[List["Document"]] = relationship(
-        back_populates="dataset", cascade="all, delete-orphan"
-    )
+class Dataset(SQLModel, table=True):
+    name: str = Field(primary_key=True)
+    docs: list["Document"] = Relationship(back_populates="dataset", cascade_delete=True)
 
     def __repr__(self) -> str:
         return f"Dataset(name={self.name!r}, docs={len(self.docs)!r})"
 
 
-class Document(Base):
-    __tablename__ = "document"
-    id: Mapped[str] = mapped_column(primary_key=True)
-    content: Mapped[str]
-    dataset_name: Mapped[str] = mapped_column(ForeignKey("dataset.name"))
-    dataset: Mapped["Dataset"] = relationship(back_populates="docs")
+class Document(SQLModel, table=True):
+    id: str = Field(primary_key=True)
+    content: str = Field()
+    dataset_name: str = Field(foreign_key="dataset.name")
+    dataset: Dataset = Relationship(back_populates="docs")
 
     def __repr__(self) -> str:
         return f"Document(id={self.id!r}, content={self.content!r})"

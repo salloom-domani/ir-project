@@ -24,31 +24,31 @@ def generate_vectorizer(
 
     makedirs(".objects", exist_ok=True)
 
-    dump(vectorizer, ".objects/tfidf_vectorizer.joblib")
-    dump(tfidf_matrix, ".objects/tfidf_matrix.joblib")
+    dump(vectorizer, f".objects/old_{dataset}_tfidf_vectorizer.joblib")
+    dump(tfidf_matrix, f".objects/old_{dataset}_tfidf_matrix.joblib")
 
     return vectorizer, tfidf_matrix
 
 
 def get_vectorizer(dataset: str):
-    vectorizer = load(".objects/tfidf_vectorizer.joblib")
-    tfidf_matrix = load(".objects/tfidf_matrix.joblib")
+    vectorizer = load(f".objects/old_{dataset}_tfidf_vectorizer.joblib")
+    tfidf_matrix = load(f".objects/old_{dataset}_tfidf_matrix.joblib")
 
     return vectorizer, tfidf_matrix
 
 
-# def search(query: str, dataset: str):
-#     vectorizer, tfidf_matrix = get_vectorizer(dataset)
-#     query_vec = vectorizer.transform([query])
-#     scores = cosine_similarity(query_vec, tfidf_matrix).flatten()
-#
-#     ranked_indices = scores.argsort()[::-1]
-#
-#     results = []
-#     for rank, idx in enumerate(ranked_indices):
-#         results.append({"score": scores[idx], "doc_idx": idx, "rank": rank + 1})
-#
-#     return results
+def search_on_the_fly(query: str, dataset: str):
+    vectorizer, tfidf_matrix = get_vectorizer(dataset)
+    query_vec = vectorizer.transform([query])
+    scores = cosine_similarity(query_vec, tfidf_matrix).flatten()
+
+    ranked_indices = scores.argsort()[::-1]
+
+    results = []
+    for rank, idx in enumerate(ranked_indices):
+        results.append({"score": scores[idx], "doc_idx": idx, "rank": rank + 1})
+
+    return results
 
 
 def search(query: str, vectorizer, tfidf_matrix):

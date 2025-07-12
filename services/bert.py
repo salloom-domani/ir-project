@@ -1,5 +1,4 @@
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 
 from langchain_core.documents import Document
@@ -33,9 +32,9 @@ dbs = {
 }
 
 
-def search(query: str, dataset: str):
+def search(query: str, dataset: str, limit: int = 10):
     db = dbs[dataset]
-    results = db.similarity_search_with_score(query)
+    results = db.similarity_search_with_score(query, k=limit)
 
     return results
 

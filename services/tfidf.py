@@ -32,9 +32,11 @@ class ScoredTFIDFRetriever(TFIDFRetriever):
         return cls(vectorizer=vectorizer, docs=docs, tfidf_array=tfidf_array, **kwargs)
 
     def _get_relevant_documents(
-        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+        self, query: str, *, run_manager: CallbackManagerForRetrieverRun, **kwargs: Any
     ) -> List[Document]:
         from sklearn.metrics.pairwise import cosine_similarity
+
+        limit = kwargs.get("k", self.k)
 
         query_vec = self.vectorizer.transform([query])
         results = cosine_similarity(self.tfidf_array, query_vec).reshape((-1,))
@@ -44,7 +46,7 @@ class ScoredTFIDFRetriever(TFIDFRetriever):
                 page_content=self.docs[i].page_content,
                 metadata={"score": results[i], "id": self.docs[i].metadata["id"]},
             )
-            for i in results.argsort()[-self.k :][::-1]
+            for i in results.argsort()[-limit:][::-1]
         ]
         return return_docs
 
@@ -74,6 +76,23 @@ def generate_vectorizer(
     return retriever
 
 
+def generate_vectorizer_default(
+    dataset: str,
+    docs: List[Document],
+):
+    retriever = ScoredTFIDFRetriever.from_documents(
+        docs,
+    )
+
+    dataset = sanitize(dataset)
+    retriever.save_local(
+        ".objects",
+        file_name=f"default_{dataset}",
+    )
+
+    return retriever
+
+
 def get_vectorizer(dataset: str):
     dataset = sanitize(dataset)
     retriever_copy = ScoredTFIDFRetriever.load_local(
@@ -84,7 +103,18 @@ def get_vectorizer(dataset: str):
     return retriever_copy
 
 
-def search(query: str, dataset: str):
-    vectorizer = get_vectorizer(dataset)
-    results = vectorizer.invoke(query)
+def get_vectorizer_default(dataset: str):
+    dataset = sanitize(dataset)
+    retriever_copy = ScoredTFIDFRetriever.load_local(
+        ".objects",
+        file_name=f"default_{dataset}",
+        allow_dangerous_deserialization=True,
+    )
+    return retriever_copy
+
+
+def search(query: str, dataset: str, limit: int = 10):
+    # vectorizer = get_vectorizer(dataset)
+    vectorizer = get_vectorizer_default(dataset)
+    results = vectorizer.invoke(query, None, k=limit)
     return results

@@ -1,29 +1,25 @@
 from ir_measures import ScoredDoc, calc_aggregate
 from ir_measures import MAP, MRR, P, Recall
 
-from dataset.load import load_documents, load_qrels, load_queries
+from dataset.load import load_qrels, load_queries
 from dataset.process import process
 
-from services.tf_idf import search, get_vectorizer
+from services.tfidf import get_vectorizer_default as get_vectorizer
 
 
-def test_tfidf(dataset: str):
-    docs = load_documents(dataset)
+def test_tfidf_langchain(dataset: str):
     queries = load_queries(dataset)
     qrels = load_qrels(dataset)
-
-    vectorizer, tfidf_matrix = get_vectorizer(dataset)
+    vectorizer = get_vectorizer(dataset)
 
     run = []
     for query in queries:
         processd_query = process(query.text)
         processd_query = " ".join(processd_query)
-        search_results = search(processd_query, vectorizer, tfidf_matrix)
+        search_results = vectorizer.invoke(processd_query)
 
-        for result in search_results:
-            scoredDoc = ScoredDoc(
-                query.query_id, docs[result["doc_idx"]].doc_id, result["score"]
-            )
+        for doc in search_results:
+            scoredDoc = ScoredDoc(query.query_id, doc.id or "", doc.metadata["score"])
             run.append(scoredDoc)
 
     mesures = calc_aggregate(

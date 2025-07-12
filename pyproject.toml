@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi[standard]>=0.116.1",
     "ir-datasets>=0.5.11",
     "ir-measures>=0.3.7",
     "langchain>=0.3.26",
@@ -15,4 +16,5 @@ dependencies = [
     "pandas>=2.3.0",
     "scikit-learn>=1.7.0",
     "sentence-transformers>=5.0.0",
+    "sqlmodel>=0.0.24",
 ]
